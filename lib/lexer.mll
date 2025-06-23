@@ -12,7 +12,7 @@ let newline = '\r' | '\n' | "\r\n"
 
 rule token = parse
   | whitespace+    { token lexbuf }  
-  | "//" [^ '\n' '\r']* { token lexbuf }  (* 跳过单行注释 *)
+  | "//" [^ '\n' ]* { token lexbuf }  (* 跳过单行注释 *)
   | "/*"           { multi_line_comment lexbuf }  (* 处理多行注释 *)
   
   (* 关键字 *)

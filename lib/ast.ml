@@ -1,3 +1,4 @@
+(*AST*)
 type binop = 
   | Add | Sub | Mul | Div | Mod
   | Lt | Gt | Le | Ge | Eq | Ne
@@ -11,10 +12,10 @@ type expr =
   | BinOp of binop * expr * expr
   | UnOp of unop * expr
   | Call of string * expr list
-  | Assignment of string * expr
 
 type stmt =
   | Block of stmt list
+  | EmptyStmt
   | ExprStmt of expr
   | VarDecl of string * expr  (* int id = expr; *)
   | Assign of string * expr   (* id = expr; *)
@@ -22,9 +23,9 @@ type stmt =
   | While of expr * stmt      (* while (expr) stmt *)
   | Break
   | Continue
-  | Return
+  | Return of expr option
 
-type param = string
+type param = { ptype: [`Int]; pname: string } 
 
 type func_def = {
   return_type: [`Int | `Void];
@@ -34,3 +35,5 @@ type func_def = {
 }
 
 type program = func_def list
+
+
