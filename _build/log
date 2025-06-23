@@ -1,0 +1,6 @@
+# dune init proj toycproj
+# OCAMLPARAM: unset
+# Shared cache: enabled-except-user-rules
+# Shared cache location: /home/jia/.cache/dune/db
+# Workspace root: /home/jia/toycproj
+# Auto-detected concurrency: 16
