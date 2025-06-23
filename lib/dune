@@ -1,2 +1,7 @@
-(library
- (name toycproj))
+ (library
+ (name toyc)
+ (modules ast lexer token) 
+ (libraries))
+
+
+(ocamllex lexer)

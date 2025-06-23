@@ -1,4 +1,5 @@
 (executable
- (public_name toycproj)
  (name main)
- (libraries toycproj))
+ (public_name toycproj)
+ (libraries toyc)
+ (modules main))
