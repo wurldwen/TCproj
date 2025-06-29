@@ -1,12 +1,12 @@
 (* OCamllex实现词法分析器 *)
 {
-  open Token
+  open Parser
   exception LexicalError of string
 }
 
 let digit = ['0'-'9']
-let alpha = ['a'-'z' 'A'-'Z']
-let alnum = ['a'-'z' 'A'-'Z' '0'-'9']
+(* let alpha = ['a'-'z' 'A'-'Z']
+let alnum = ['a'-'z' 'A'-'Z' '0'-'9'] *)
 let whitespace = [' ' '\t' '\r' '\n']
 let newline = '\r' | '\n' | "\r\n"
 
@@ -26,12 +26,14 @@ rule token = parse
   | "return"       { RETURN }
   
   (* 标识符 *)
-  | alpha alnum* as id { ID id }
+  (* | alpha alnum* as id { ID id } *)
+  | ['_''A'-'Z''a'-'z']['_''A'-'Z''a'-'z''0'-'9']* as id { ID id }
   
   (* 整数 *)
-  | '-'? '0'       { NUM 0 }
-  |'-'? ['1'-'9'] digit* as num { NUM (int_of_string num) }
-  
+  (* | '-'? '0'       { NUM 0 }
+  |'-'? ['1'-'9'] digit* as num { NUM (int_of_string num) } *)
+  | ('0' | ['1'-'9']['0'-'9']*) as num { NUM (int_of_string num) }
+
   (* 运算符和分隔符 *)
   | '='            { ASSIGN }
   | ';'            { SEMI }

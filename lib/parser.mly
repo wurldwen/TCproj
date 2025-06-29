@@ -1,7 +1,6 @@
 (*OCamlyacc实现语法分析器*)
 %{
   open Ast
-  open Token
 %}
 
 %token EOF
