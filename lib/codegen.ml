@@ -189,12 +189,12 @@ let rec gen_stmt env oc break_label continue_label stmt =
       env
   | Return None -> 
       Printf.fprintf oc "  li %s, 0\n" a0;  (* void 函数默认返回0 *)
-      Printf.fprintf oc "  j .return\n";
+      Printf.fprintf oc "  j %s\n" break_label;
       env
   | Return (Some expr) -> 
       gen_expr env oc expr;
       Printf.fprintf oc "  mv %s, %s\n" a0 t0;
-      Printf.fprintf oc "  j .return\n";
+      Printf.fprintf oc "  j %s\n" break_label;
       env
 
 (* 生成函数代码 *)
@@ -205,10 +205,17 @@ let gen_function oc func =
       (new_env ()) 
       func.params in
   
+  let return_label = func.name ^ ".return" in
+
+  (* 生成函数体，提前计算局部变量空间 *)
+  let env_body = gen_stmt env oc return_label "" (Block func.body) in
+  let stack_size = -env_body.current_offset - 4 in  (* 计算局部变量空间 *)
+  let total_stack = 16 + stack_size in
+
   Printf.fprintf oc "\n%s:\n" func.name;
   
   (* 函数序言 *)
-  Printf.fprintf oc "  addi %s, %s, -16\n" sp sp;  (* 分配空间: ra, fp, 局部变量 *)
+  Printf.fprintf oc "  addi %s, %s, -%d\n" sp sp total_stack;  (* 分配空间: ra, fp, 局部变量 *)
   Printf.fprintf oc "  sw %s, 12(%s)\n" ra sp;    (* 保存返回地址 *)
   Printf.fprintf oc "  sw %s, 8(%s)\n" fp sp;     (* 保存帧指针 *)
   Printf.fprintf oc "  addi %s, %s, 16\n" fp sp;  (* 设置新帧指针 *)
@@ -220,17 +227,15 @@ let gen_function oc func =
   ) func.params;
   
   (* 生成函数体 *)
-  let env_body = gen_stmt env oc "" "" (Block func.body) in
-  let stack_size = -env_body.current_offset - 4 in  (* 计算局部变量空间 *)
-  
+  ignore (gen_stmt env oc return_label "" (Block func.body));
+
   (* 函数返回标签 *)
-  Printf.fprintf oc ".return:\n";
+  Printf.fprintf oc "%s:\n" return_label;
   
   (* 函数尾声 *)
   Printf.fprintf oc "  lw %s, 12(%s)\n" ra sp;    (* 恢复返回地址 *)
   Printf.fprintf oc "  lw %s, 8(%s)\n" fp sp;     (* 恢复帧指针 *)
-  Printf.fprintf oc "  addi %s, %s, 16\n" sp sp;  (* 恢复栈指针 *)
-  Printf.fprintf oc "  addi %s, %s, %d\n" sp sp stack_size;  (* 释放局部变量空间 *)
+  Printf.fprintf oc "  addi %s, %s, %d\n" sp sp total_stack;  (* 恢复栈指针 *)
   Printf.fprintf oc "  ret\n"
 
 (* 生成整个程序 *)
