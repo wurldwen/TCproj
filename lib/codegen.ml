@@ -214,16 +214,15 @@ let gen_function oc func =
 
   Printf.fprintf oc "\n%s:\n" func.name;
   
-  (* 函数序言 *)
-  Printf.fprintf oc "  addi %s, %s, -%d\n" sp sp total_stack;  (* 分配空间: ra, fp, 局部变量 *)
-  Printf.fprintf oc "  sw %s, 12(%s)\n" ra sp;    (* 保存返回地址 *)
-  Printf.fprintf oc "  sw %s, 8(%s)\n" fp sp;     (* 保存帧指针 *)
-  Printf.fprintf oc "  addi %s, %s, 16\n" fp sp;  (* 设置新帧指针 *)
+  (* 函数序言：分配total_stack空间，保存ra/fp到高地址，fp=sp+total_stack *)
+  Printf.fprintf oc "  addi %s, %s, -%d\n" sp sp total_stack;
+  Printf.fprintf oc "  sw %s, %d(%s)\n" ra (total_stack - 4) sp;
+  Printf.fprintf oc "  sw %s, %d(%s)\n" fp (total_stack - 8) sp;
+  Printf.fprintf oc "  addi %s, %s, %d\n" fp sp total_stack;
   
-  (* 保存参数到栈 *)
-  List.iter (fun param ->
-    let offset = find_var env param.pname in
-    Printf.fprintf oc "  sw a%d, %d(%s)\n" (List.assoc param.pname env.var_offset / 4 - 2) offset fp
+  (* 保存参数到栈（如有）*)
+  List.iteri (fun i _ ->
+    Printf.fprintf oc "  sw a%d, %d(%s)\n" i (8 + i * 4) fp
   ) func.params;
   
   (* 生成函数体 *)
@@ -232,10 +231,10 @@ let gen_function oc func =
   (* 函数返回标签 *)
   Printf.fprintf oc "%s:\n" return_label;
   
-  (* 函数尾声 *)
-  Printf.fprintf oc "  lw %s, 12(%s)\n" ra sp;    (* 恢复返回地址 *)
-  Printf.fprintf oc "  lw %s, 8(%s)\n" fp sp;     (* 恢复帧指针 *)
-  Printf.fprintf oc "  addi %s, %s, %d\n" sp sp total_stack;  (* 恢复栈指针 *)
+  (* 函数尾声：恢复ra/fp，sp加回total_stack *)
+  Printf.fprintf oc "  lw %s, %d(%s)\n" ra (total_stack - 4) sp;
+  Printf.fprintf oc "  lw %s, %d(%s)\n" fp (total_stack - 8) sp;
+  Printf.fprintf oc "  addi %s, %s, %d\n" sp sp total_stack;
   Printf.fprintf oc "  ret\n"
 
 (* 生成整个程序 *)
