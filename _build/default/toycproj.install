@@ -1,0 +1,8 @@
+lib: [
+  "_build/install/default/lib/toycproj/META"
+  "_build/install/default/lib/toycproj/dune-package"
+  "_build/install/default/lib/toycproj/opam"
+]
+bin: [
+  "_build/install/default/bin/toycproj"
+]

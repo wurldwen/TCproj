@@ -1,6 +1,6 @@
 (library
  (name toyc)
- (modules ast lexer token parser) 
+ (modules ast lexer token parser semantic codegen)
  (libraries))
 
 (ocamllex lexer)
