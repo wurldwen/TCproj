@@ -25,16 +25,16 @@ type env = {
 (* 创建新环境 *)
 let new_env () = { 
   var_offset = []; 
-  current_offset = -4;  (* 从-4开始分配局部变量 *)
+  current_offset = 0;  (* 局部变量从-4开始分配，current_offset为负数 *)
   param_count = 0; 
 }
 
 (* 添加局部变量到环境 *)
 let add_local_var env name =
-  let offset = env.current_offset in
+  let offset = env.current_offset - 4 in
   {
     var_offset = (name, offset) :: env.var_offset;
-    current_offset = offset - 4;
+    current_offset = offset;
     param_count = env.param_count;
   }
 
@@ -209,20 +209,21 @@ let gen_function oc func =
 
   (* 生成函数体，提前计算局部变量空间 *)
   let env_body = gen_stmt env oc return_label "" (Block func.body) in
-  let stack_size = -env_body.current_offset - 4 in  (* 计算局部变量空间 *)
+  let stack_size = -env_body.current_offset in  (* 计算局部变量空间 *)
   let total_stack = 16 + stack_size in
 
   Printf.fprintf oc "\n%s:\n" func.name;
   
-  (* 函数序言：分配total_stack空间，保存ra/fp到高地址，fp=sp+total_stack *)
+  (* 函数序言：分配total_stack空间，保存ra/fp到高地址，fp=sp+total_stack=old_sp *)
   Printf.fprintf oc "  addi %s, %s, -%d\n" sp sp total_stack;
   Printf.fprintf oc "  sw %s, %d(%s)\n" ra (total_stack - 4) sp;
   Printf.fprintf oc "  sw %s, %d(%s)\n" fp (total_stack - 8) sp;
   Printf.fprintf oc "  addi %s, %s, %d\n" fp sp total_stack;
   
-  (* 保存参数到栈（如有）*)
+  (* 保存前8个参数到栈（如有）*)
   List.iteri (fun i _ ->
-    Printf.fprintf oc "  sw a%d, %d(%s)\n" i (8 + i * 4) fp
+    if i < 8 then
+      Printf.fprintf oc "  sw a%d, %d(%s)\n" i (8 + i * 4) fp
   ) func.params;
   
   (* 生成函数体 *)
