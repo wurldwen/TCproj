@@ -49,6 +49,26 @@ let rec gen_expr env oc = function
   | Not e ->
       gen_expr env oc e;
       Printf.fprintf oc "  seqz %s, %s\n" t0 t0
+  | Binop (e1, And, e2) ->
+      let false_label = new_label () in
+      let end_label = new_label () in
+      gen_expr env oc e1;
+      Printf.fprintf oc "  beqz %s, %s\n" t0 false_label;
+      gen_expr env oc e2;
+      Printf.fprintf oc "  beqz %s, %s\n" t0 false_label;
+      Printf.fprintf oc "  li %s, 1\n" t0;
+      Printf.fprintf oc "  j %s\n" end_label;
+      Printf.fprintf oc "%s:\n  li %s, 0\n%s:\n" false_label t0 end_label
+  | Binop (e1, Or, e2) ->
+      let true_label = new_label () in
+      let end_label = new_label () in
+      gen_expr env oc e1;
+      Printf.fprintf oc "  bnez %s, %s\n" t0 true_label;
+      gen_expr env oc e2;
+      Printf.fprintf oc "  bnez %s, %s\n" t0 true_label;
+      Printf.fprintf oc "  li %s, 0\n" t0;
+      Printf.fprintf oc "  j %s\n" end_label;
+      Printf.fprintf oc "%s:\n  li %s, 1\n%s:\n" true_label t0 end_label
   | Binop (e1, op, e2) ->
       gen_expr env oc e1;
       Printf.fprintf oc "  mv %s, %s\n" t1 t0;
@@ -65,23 +85,8 @@ let rec gen_expr env oc = function
       | Ge -> Printf.fprintf oc "  slt %s, %s, %s\n  xori %s, %s, 1\n" t0 t1 t0 t0 t0
       | Eq -> Printf.fprintf oc "  xor %s, %s, %s\n  seqz %s, %s\n" t0 t1 t0 t0 t0
       | Ne -> Printf.fprintf oc "  xor %s, %s, %s\n  snez %s, %s\n" t0 t1 t0 t0 t0
-      | And ->
-          let false_label = new_label () in
-          let end_label = new_label () in
-          Printf.fprintf oc "  beqz %s, %s\n" t1 false_label;
-          Printf.fprintf oc "  snez %s, %s\n" t0 t0;
-          Printf.fprintf oc "  j %s\n" end_label;
-          Printf.fprintf oc "%s:\n  li %s, 0\n%s:\n" false_label t0 end_label
-      | Or ->
-          let true_label = new_label () in
-          let end_label = new_label () in
-          Printf.fprintf oc "  bnez %s, %s\n" t1 true_label;
-          Printf.fprintf oc "  snez %s, %s\n" t0 t0;
-          Printf.fprintf oc "  j %s\n" end_label;
-          Printf.fprintf oc "%s:\n  li %s, 1\n%s:\n" true_label t0 end_label
-      )
+      | _ -> ())
   | Call (fname, args) ->
-      (* 传递前8个参数到a0~a7，其余压栈 *)
       let n = List.length args in
       List.iteri (fun i arg ->
         gen_expr env oc arg;
