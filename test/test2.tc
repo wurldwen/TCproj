@@ -1,0 +1,54 @@
+int add(int x, int y) {
+    int sum = x + y;
+    return sum;
+}
+
+void do_nothing() {
+    int a = 1;
+    // 空函数体，测试void return
+    return;
+}
+
+int main() {
+    int a = 1;
+    int b = 2;
+    int c = 0;
+    int d = 0;
+    int e = 0;
+
+    // 算术、关系、逻辑运算
+    if ((a + b * 2 > 4) && (b == 2 || a != 1)) {
+        c = add(a, b);
+    } else {
+        c = 42;
+    }
+    // while + break + continue
+    int sum = 0;
+    int i = 0;
+    while (i < 10) {
+        i = i + 1;
+        if (i == 5) {
+            continue;
+        }
+        if (i == 8) {
+            break;
+        }
+        sum = sum + i;
+    }
+
+    // 作用域与变量遮蔽
+    {
+        int a = 100;
+        d = a; // d = 100
+    }
+    e = a; // e = 1
+
+    do_nothing();
+
+    // 综合return
+    if (sum > 20) {
+        return c + sum + d + e; // 路径1
+    } else {
+        return c + sum + d - e; // 路径2
+    }
+}
