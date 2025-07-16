@@ -98,9 +98,14 @@ let rec gen_expr env oc = function
       Printf.fprintf oc "  mv %s, %s\n" t0 a0
 
 (* 生成语句代码 *)
-let rec gen_stmt env oc break_label cont_label = function
+let rec gen_stmt env oc ret_label break_label cont_label = function
   | Block stmts ->
-      List.fold_left (fun env stmt -> gen_stmt env oc break_label cont_label stmt) env stmts
+      let rec aux env = function
+        | [] -> env
+        | s::ss -> aux (gen_stmt env oc ret_label break_label cont_label s) ss
+      in
+      let env' = aux env stmts in
+      { env with current_offset = env'.current_offset }
   | Expr e -> gen_expr env oc e; env
   | VarDecl (_, id, e) ->
       let new_env = add_local_var env id in
@@ -118,10 +123,10 @@ let rec gen_stmt env oc break_label cont_label = function
       let end_label = new_label () in
       gen_expr env oc cond;
       Printf.fprintf oc "  beqz %s, %s\n" t0 else_label;
-      let env1 = gen_stmt env oc break_label cont_label s1 in
+      let env1 = gen_stmt env oc ret_label break_label cont_label s1 in
       Printf.fprintf oc "  j %s\n" end_label;
       Printf.fprintf oc "%s:\n" else_label;
-      let env2 = match s2_opt with Some s2 -> gen_stmt env oc break_label cont_label s2 | None -> env1 in
+      let env2 = match s2_opt with Some s2 -> gen_stmt env oc ret_label break_label cont_label s2 | None -> env1 in
       Printf.fprintf oc "%s:\n" end_label;
       env2
   | While (cond, s) ->
@@ -130,26 +135,27 @@ let rec gen_stmt env oc break_label cont_label = function
       Printf.fprintf oc "%s:\n" start_label;
       gen_expr env oc cond;
       Printf.fprintf oc "  beqz %s, %s\n" t0 end_label;
-      let env' = gen_stmt env oc end_label start_label s in
+      let env' = gen_stmt env oc ret_label end_label start_label s in
       Printf.fprintf oc "  j %s\n" start_label;
       Printf.fprintf oc "%s:\n" end_label;
       env'
   | Break -> Printf.fprintf oc "  j %s\n" break_label; env
   | Continue -> Printf.fprintf oc "  j %s\n" cont_label; env
-  | Return None -> Printf.fprintf oc "  li %s, 0\n  j __ret\n" a0; env
+  | Return None -> Printf.fprintf oc "  li %s, 0\n  j %s\n" a0 ret_label; env
   | Return (Some e) ->
       gen_expr env oc e;
-      Printf.fprintf oc "  mv %s, %s\n  j __ret\n" a0 t0; env
+      Printf.fprintf oc "  mv %s, %s\n  j %s\n" a0 t0 ret_label; env
 
 (* 生成函数代码 *)
 let gen_function oc func =
+  let ret_label = func.name ^ "_ret" in
   (* 参数入环境，正偏移 *)
   let env =
     List.mapi (fun i p -> (i, p)) func.params
     |> List.fold_left (fun env (i, p) -> add_param env p.pname i) (new_env ())
   in
   (* 计算局部变量空间 *)
-  let env_body = gen_stmt env oc "" "" (Block func.body) in
+  let env_body = gen_stmt env oc ret_label "" "" (Block func.body) in
   let stack_size = -env_body.current_offset in
   let total_stack = 16 + stack_size in
   Printf.fprintf oc "\n%s:\n" func.name;
@@ -164,9 +170,9 @@ let gen_function oc func =
       Printf.fprintf oc "  sw a%d, %d(%s)\n" i (8 + i * 4) fp
   ) func.params;
   (* 生成函数体 *)
-  ignore (gen_stmt env oc "" "" (Block func.body));
+  ignore (gen_stmt env oc ret_label "" "" (Block func.body));
   (* return标签 *)
-  Printf.fprintf oc "__ret:\n";
+  Printf.fprintf oc "%s:\n" ret_label;
   (* epilogue *)
   Printf.fprintf oc "  lw %s, %d(%s)\n" ra (total_stack-4) sp;
   Printf.fprintf oc "  lw %s, %d(%s)\n" fp (total_stack-8) sp;
