@@ -21,9 +21,9 @@ type env = {
   current_offset: int;
 }
 
-let new_env () = { var_offset = []; current_offset = 0 }
+let new_env () = { var_offset = []; current_offset = -16 }  (* 局部变量从-16(fp)开始，避免与ra/fp重叠 *)
 
-(* 添加局部变量：负偏移 *)
+(* 添加局部变量：负偏移，从-16(fp)开始递减 *)
 let add_local_var env name =
   let offset = env.current_offset - 4 in
   { var_offset = (name, offset) :: env.var_offset; current_offset = offset }
