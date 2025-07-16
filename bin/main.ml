@@ -109,12 +109,8 @@ let () =
 
     Semantic.check_program ast;
 
-    (* 代码生成到 stdout *)
-    let buf = Buffer.create 4096 in
-    let oc = Buffer.formatter_of_buffer buf in
-    Codegen.gen_program oc ast;
-    Format.pp_print_flush oc ();
-    print_string (Buffer.contents buf);
+    (* 直接输出到 stdout *)
+    Codegen.gen_program stdout ast;
 
   with
   | Lexer.LexicalError msg ->
