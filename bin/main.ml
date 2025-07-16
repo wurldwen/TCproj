@@ -73,7 +73,9 @@ let read_stdin () =
   let buf = Buffer.create 4096 in
   (try
     while true do
-      Buffer.add_channel buf stdin 4096
+      let line = input_line stdin in
+      Buffer.add_string buf line;
+      Buffer.add_char buf '\n';
     done
   with End_of_file -> ());
   Buffer.contents buf
@@ -95,6 +97,7 @@ let () =
 
   try
     let source = read_stdin () in
+    if String.trim source = "" then (prerr_endline "输入为空"; exit 1);
     let lexbuf = Lexing.from_string source in
     lexbuf.lex_curr_p <- { lexbuf.lex_curr_p with pos_fname = "" };
 
