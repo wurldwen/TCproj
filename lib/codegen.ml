@@ -106,12 +106,13 @@ let rec gen_expr env oc = function
 (* 生成语句代码 *)
 let rec gen_stmt env oc ret_label break_label cont_label = function
   | Block stmts ->
+      let old_env = env in
       let rec aux env = function
         | [] -> env
         | s::ss -> aux (gen_stmt env oc ret_label break_label cont_label s) ss
       in
-      let env' = aux env stmts in
-      env'
+      ignore (aux env stmts);
+      old_env
   | Expr e -> gen_expr env oc e; env
   | VarDecl (_, id, e) ->
       let new_env = add_local_var env id in
