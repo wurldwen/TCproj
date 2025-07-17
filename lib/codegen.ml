@@ -69,8 +69,11 @@ let rec gen_expr env oc = function
       Printf.fprintf oc "%s:\n  li %s, 1\n%s:\n" true_label t0 end_label
   | Binop (e1, op, e2) ->
       gen_expr env oc e1;
-      Printf.fprintf oc "  mv %s, %s\n" t1 t0;
+      Printf.fprintf oc "  addi sp, sp, -4\n";
+      Printf.fprintf oc "  sw %s, 0(sp)\n" t0;
       gen_expr env oc e2;
+      Printf.fprintf oc "  lw %s, 0(sp)\n" t1;
+      Printf.fprintf oc "  addi sp, sp, 4\n";
       (match op with
       | Add -> Printf.fprintf oc "  add %s, %s, %s\n" t0 t1 t0
       | Sub -> Printf.fprintf oc "  sub %s, %s, %s\n" t0 t1 t0
@@ -103,12 +106,13 @@ let rec gen_expr env oc = function
 (* 生成语句代码 *)
 let rec gen_stmt env oc ret_label break_label cont_label = function
   | Block stmts ->
+      let old_env = env in
       let rec aux env = function
         | [] -> env
         | s::ss -> aux (gen_stmt env oc ret_label break_label cont_label s) ss
       in
-      let env' = aux env stmts in
-      { env with current_offset = env'.current_offset }
+      ignore (aux env stmts);
+      old_env
   | Expr e -> gen_expr env oc e; env
   | VarDecl (_, id, e) ->
       let new_env = add_local_var env id in
