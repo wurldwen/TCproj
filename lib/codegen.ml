@@ -55,8 +55,7 @@ let rec gen_expr env oc = function
       gen_expr env oc e1;
       Printf.fprintf oc "  beqz %s, %s\n" t0 false_label;
       gen_expr env oc e2;
-      Printf.fprintf oc "  beqz %s, %s\n" t0 false_label;
-      Printf.fprintf oc "  li %s, 1\n" t0;
+      Printf.fprintf oc "  mv %s, %s\n" t0 t0;
       Printf.fprintf oc "  j %s\n" end_label;
       Printf.fprintf oc "%s:\n  li %s, 0\n%s:\n" false_label t0 end_label
   | Binop (e1, Or, e2) ->
@@ -65,8 +64,7 @@ let rec gen_expr env oc = function
       gen_expr env oc e1;
       Printf.fprintf oc "  bnez %s, %s\n" t0 true_label;
       gen_expr env oc e2;
-      Printf.fprintf oc "  bnez %s, %s\n" t0 true_label;
-      Printf.fprintf oc "  li %s, 0\n" t0;
+      Printf.fprintf oc "  mv %s, %s\n" t0 t0;
       Printf.fprintf oc "  j %s\n" end_label;
       Printf.fprintf oc "%s:\n  li %s, 1\n%s:\n" true_label t0 end_label
   | Binop (e1, op, e2) ->
