@@ -49,10 +49,31 @@ let rec gen_expr env oc = function
   | Not e ->
       gen_expr env oc e;
       Printf.fprintf oc "  seqz %s, %s\n" t0 t0
+  | Binop (e1, And, e2) ->
+      let false_label = new_label () in
+      let end_label = new_label () in
+      gen_expr env oc e1;
+      Printf.fprintf oc "  beqz %s, %s\n" t0 false_label;
+      gen_expr env oc e2;
+      Printf.fprintf oc "  mv %s, %s\n" t0 t0;
+      Printf.fprintf oc "  j %s\n" end_label;
+      Printf.fprintf oc "%s:\n  li %s, 0\n%s:\n" false_label t0 end_label
+  | Binop (e1, Or, e2) ->
+      let true_label = new_label () in
+      let end_label = new_label () in
+      gen_expr env oc e1;
+      Printf.fprintf oc "  bnez %s, %s\n" t0 true_label;
+      gen_expr env oc e2;
+      Printf.fprintf oc "  mv %s, %s\n" t0 t0;
+      Printf.fprintf oc "  j %s\n" end_label;
+      Printf.fprintf oc "%s:\n  li %s, 1\n%s:\n" true_label t0 end_label
   | Binop (e1, op, e2) ->
       gen_expr env oc e1;
-      Printf.fprintf oc "  mv %s, %s\n" t1 t0;
+      Printf.fprintf oc "  addi sp, sp, -4\n";
+      Printf.fprintf oc "  sw %s, 0(sp)\n" t0;
       gen_expr env oc e2;
+      Printf.fprintf oc "  lw %s, 0(sp)\n" t1;
+      Printf.fprintf oc "  addi sp, sp, 4\n";
       (match op with
       | Add -> Printf.fprintf oc "  add %s, %s, %s\n" t0 t1 t0
       | Sub -> Printf.fprintf oc "  sub %s, %s, %s\n" t0 t1 t0
@@ -65,23 +86,8 @@ let rec gen_expr env oc = function
       | Ge -> Printf.fprintf oc "  slt %s, %s, %s\n  xori %s, %s, 1\n" t0 t1 t0 t0 t0
       | Eq -> Printf.fprintf oc "  xor %s, %s, %s\n  seqz %s, %s\n" t0 t1 t0 t0 t0
       | Ne -> Printf.fprintf oc "  xor %s, %s, %s\n  snez %s, %s\n" t0 t1 t0 t0 t0
-      | And ->
-          let false_label = new_label () in
-          let end_label = new_label () in
-          Printf.fprintf oc "  beqz %s, %s\n" t1 false_label;
-          Printf.fprintf oc "  snez %s, %s\n" t0 t0;
-          Printf.fprintf oc "  j %s\n" end_label;
-          Printf.fprintf oc "%s:\n  li %s, 0\n%s:\n" false_label t0 end_label
-      | Or ->
-          let true_label = new_label () in
-          let end_label = new_label () in
-          Printf.fprintf oc "  bnez %s, %s\n" t1 true_label;
-          Printf.fprintf oc "  snez %s, %s\n" t0 t0;
-          Printf.fprintf oc "  j %s\n" end_label;
-          Printf.fprintf oc "%s:\n  li %s, 1\n%s:\n" true_label t0 end_label
-      )
+      | _ -> ())
   | Call (fname, args) ->
-      (* 传递前8个参数到a0~a7，其余压栈 *)
       let n = List.length args in
       List.iteri (fun i arg ->
         gen_expr env oc arg;
@@ -100,12 +106,13 @@ let rec gen_expr env oc = function
 (* 生成语句代码 *)
 let rec gen_stmt env oc ret_label break_label cont_label = function
   | Block stmts ->
+      let old_env = env in
       let rec aux env = function
         | [] -> env
         | s::ss -> aux (gen_stmt env oc ret_label break_label cont_label s) ss
       in
-      let env' = aux env stmts in
-      { env with current_offset = env'.current_offset }
+      ignore (aux env stmts);
+      old_env
   | Expr e -> gen_expr env oc e; env
   | VarDecl (_, id, e) ->
       let new_env = add_local_var env id in
