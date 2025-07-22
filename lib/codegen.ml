@@ -204,11 +204,11 @@ let gen_function oc func =
   Printf.fprintf oc "  ret\n"
 
 (* 生成整个程序 *)
-(* let gen_program oc program =
-  Printf.fprintf oc ".text\n  .globl main\n";
-  List.iter (gen_function oc) program *)
-(* 生成整个程序 *)
 let gen_program oc program =
+  Printf.fprintf oc ".text\n  .globl main\n";
+  List.iter (gen_function oc) program
+(* 生成整个程序 *)
+(* let gen_program oc program =
   Printf.fprintf oc ".text\n";
   Printf.fprintf oc ".globl _start\n";
   Printf.fprintf oc "_start:\n";
@@ -217,4 +217,4 @@ let gen_program oc program =
   Printf.fprintf oc "  mv a0, a0\n";     (* exit code in a0 *)
   Printf.fprintf oc "  ecall\n";         (* system call *)
   Printf.fprintf oc "\n.globl main\n";
-  List.iter (gen_function oc) program
+  List.iter (gen_function oc) program *)
