@@ -85,7 +85,7 @@ printf "[SUCCESS] 编译成功! 输出文件: %s\n" output_file;
   | e -> 
     prerr_endline ("未处理的异常: " ^ Printexc.to_string e); exit 1 *)
 
-    (*编译器主程序-希冀平台测试使用，标准输入输出代码*)
+(*编译器主程序-希冀平台测试使用，标准输入输出代码*)
 open Toyc
 open Printf
 

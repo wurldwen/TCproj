@@ -65,7 +65,8 @@ stmt:
   | SEMI { Block [] }
   | expr SEMI { Expr $1 }
   | ID ASSIGN expr SEMI { Assign ($1, $3) }
-  | INT ID ASSIGN expr SEMI { VarDecl ("int", $2, $4) }
+  // | INT ID ASSIGN expr SEMI { VarDecl ("int", $2, $4) }
+  | INT var_decl_list SEMI { Block $2 }              (* 新增：支持多变量声明 *)
   | RETURN expr SEMI { Return (Some $2) }
   | RETURN SEMI { Return None }
   | LBRACE stmt_list RBRACE { Block $2 }
@@ -75,14 +76,24 @@ stmt:
   | BREAK SEMI { Break }
   | CONTINUE SEMI { Continue }
 
+(* 新增：变量声明列表规则 *)
+var_decl_list:
+  | var_decl { [$1] }
+  | var_decl_list COMMA var_decl { $1 @ [$3] }
+
+(* 新增：单个变量声明规则 *)
+var_decl:
+  | ID ASSIGN expr { VarDecl ("int", $1, $3) }      (* int x = 1 *)
+  | ID { VarDecl ("int", $1, Num 0) }               (* int x; 默认初始化为0 *)
+
 expr:
   | NUM { Num $1 }
   | ID { Var $1 }
   | LPAREN expr RPAREN { $2 }
-  | SUB expr %prec UPLUS { $2 }
+  // | SUB expr %prec UPLUS { $2 }
   | SUB expr %prec UMINUS { Neg $2 }
   | ADD expr %prec UPLUS { $2 }
-  | ADD expr %prec UMINUS { Neg $2 }
+  // | ADD expr %prec UMINUS { Neg $2 }
   | NOT expr { Not $2 }
   // | expr binop expr { Binop ($1, $2, $3) }
   // | ID LPAREN args RPAREN { Call ($1, $3) }

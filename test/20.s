@@ -494,7 +494,7 @@ L26:
   lw t0, 16(s0)
   addi sp, sp, -4
   sw t0, 0(sp)
-  li t0, 1
+  li t0, -1
   lw t1, 0(sp)
   addi sp, sp, 4
   add t0, t1, t0
@@ -538,7 +538,7 @@ L30:
   sub t0, t1, t0
   addi sp, sp, -4
   sw t0, 0(sp)
-  li t0, 2
+  li t0, -2
   lw t1, 0(sp)
   addi sp, sp, 4
   sub t0, t1, t0
@@ -597,7 +597,7 @@ L34:
   lw t0, 16(s0)
   addi sp, sp, -4
   sw t0, 0(sp)
-  li t0, 3
+  li t0, -3
   lw t1, 0(sp)
   addi sp, sp, 4
   add t0, t1, t0
@@ -654,7 +654,7 @@ L40:
   sub t0, t1, t0
   addi sp, sp, -4
   sw t0, 0(sp)
-  li t0, 4
+  li t0, -4
   lw t1, 0(sp)
   addi sp, sp, 4
   sub t0, t1, t0
@@ -713,7 +713,7 @@ L46:
   lw t0, 12(s0)
   addi sp, sp, -4
   sw t0, 0(sp)
-  li t0, 5
+  li t0, -5
   lw t1, 0(sp)
   addi sp, sp, 4
   add t0, t1, t0
@@ -735,7 +735,7 @@ L43:
   sub t0, t1, t0
   addi sp, sp, -4
   sw t0, 0(sp)
-  li t0, 6
+  li t0, -6
   lw t1, 0(sp)
   addi sp, sp, 4
   sub t0, t1, t0
@@ -1582,7 +1582,7 @@ main:
   call complexFunction
   mv t0, a0
   sw t0, -48(s0)
-  li t0, 5
+  li t0, -5
   mv a0, t0
   li t0, 10
   mv a1, t0

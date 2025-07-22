@@ -30,9 +30,9 @@ rule token = parse
   | ['_''A'-'Z''a'-'z']['_''A'-'Z''a'-'z''0'-'9']* as id { ID id }
   
   (* 整数 *)
-  (* | '-'? '0'       { NUM 0 }
-  |'-'? ['1'-'9'] digit* as num { NUM (int_of_string num) } *)
-  | ('0' | ['1'-'9']['0'-'9']*) as num { NUM (int_of_string num) }
+  | '-'? '0'       { NUM 0 }
+  |'-'? ['1'-'9'] digit* as num { NUM (int_of_string num) } 
+  (* | ('0' | ['1'-'9']['0'-'9'] as num { NUM (int_of_string num) } *)
 
   (* 运算符和分隔符 *)
   | '='            { ASSIGN }

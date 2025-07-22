@@ -2,7 +2,7 @@
 with open('test/check.tc', 'r') as f:
     content = f.read()
 
-pos = 168
+pos = 91
 if pos < len(content):
     # 显示错误位置前后的内容
     start = max(0, pos - 30)
