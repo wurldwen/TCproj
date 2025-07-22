@@ -81,7 +81,9 @@ gcd:
   lw t0, 8(s0)
   mv a0, t0
   j gcd_ret
+  j L4
 L3:
+L4:
   lw t0, 12(s0)
   mv a0, t0
   lw t0, 8(s0)
@@ -116,11 +118,13 @@ isPrime:
   addi sp, sp, 4
   sgt t0, t1, t0
   xori t0, t0, 1
-  beqz t0, L4
+  beqz t0, L5
   li t0, 0
   mv a0, t0
   j isPrime_ret
-L4:
+  j L6
+L5:
+L6:
   lw t0, 8(s0)
   addi sp, sp, -4
   sw t0, 0(sp)
@@ -129,11 +133,13 @@ L4:
   addi sp, sp, 4
   sgt t0, t1, t0
   xori t0, t0, 1
-  beqz t0, L5
+  beqz t0, L7
   li t0, 1
   mv a0, t0
   j isPrime_ret
-L5:
+  j L8
+L7:
+L8:
   lw t0, 8(s0)
   addi sp, sp, -4
   sw t0, 0(sp)
@@ -148,7 +154,7 @@ L5:
   addi sp, sp, 4
   xor t0, t1, t0
   seqz t0, t0
-  bnez t0, L7
+  bnez t0, L11
   lw t0, 8(s0)
   addi sp, sp, -4
   sw t0, 0(sp)
@@ -164,18 +170,20 @@ L5:
   xor t0, t1, t0
   seqz t0, t0
   mv t0, t0
-  j L8
-L7:
+  j L12
+L11:
   li t0, 1
-L8:
-  beqz t0, L6
+L12:
+  beqz t0, L9
   li t0, 0
   mv a0, t0
   j isPrime_ret
-L6:
+  j L10
+L9:
+L10:
   li t0, 5
   sw t0, -20(s0)
-L9:
+L13:
   lw t0, -20(s0)
   addi sp, sp, -4
   sw t0, 0(sp)
@@ -190,7 +198,7 @@ L9:
   addi sp, sp, 4
   sgt t0, t1, t0
   xori t0, t0, 1
-  beqz t0, L10
+  beqz t0, L14
   lw t0, 8(s0)
   addi sp, sp, -4
   sw t0, 0(sp)
@@ -205,7 +213,7 @@ L9:
   addi sp, sp, 4
   xor t0, t1, t0
   seqz t0, t0
-  bnez t0, L12
+  bnez t0, L17
   lw t0, 8(s0)
   addi sp, sp, -4
   sw t0, 0(sp)
@@ -227,15 +235,17 @@ L9:
   xor t0, t1, t0
   seqz t0, t0
   mv t0, t0
-  j L13
-L12:
+  j L18
+L17:
   li t0, 1
-L13:
-  beqz t0, L11
+L18:
+  beqz t0, L15
   li t0, 0
   mv a0, t0
   j isPrime_ret
-L11:
+  j L16
+L15:
+L16:
   lw t0, -20(s0)
   addi sp, sp, -4
   sw t0, 0(sp)
@@ -244,8 +254,8 @@ L11:
   addi sp, sp, 4
   add t0, t1, t0
   sw t0, -20(s0)
-  j L9
-L10:
+  j L13
+L14:
   li t0, 1
   mv a0, t0
   j isPrime_ret
@@ -263,7 +273,7 @@ factorial:
   sw a0, 8(s0)
   li t0, 1
   sw t0, -20(s0)
-L14:
+L19:
   lw t0, 8(s0)
   addi sp, sp, -4
   sw t0, 0(sp)
@@ -271,7 +281,7 @@ L14:
   lw t1, 0(sp)
   addi sp, sp, 4
   sgt t0, t1, t0
-  beqz t0, L15
+  beqz t0, L20
   lw t0, -20(s0)
   addi sp, sp, -4
   sw t0, 0(sp)
@@ -288,8 +298,8 @@ L14:
   addi sp, sp, 4
   sub t0, t1, t0
   sw t0, 8(s0)
-  j L14
-L15:
+  j L19
+L20:
   lw t0, -20(s0)
   mv a0, t0
   j factorial_ret
@@ -313,11 +323,13 @@ combination:
   lw t1, 0(sp)
   addi sp, sp, 4
   sgt t0, t1, t0
-  beqz t0, L16
+  beqz t0, L21
   li t0, 0
   mv a0, t0
   j combination_ret
-L16:
+  j L22
+L21:
+L22:
   lw t0, 12(s0)
   addi sp, sp, -4
   sw t0, 0(sp)
@@ -326,7 +338,7 @@ L16:
   addi sp, sp, 4
   xor t0, t1, t0
   seqz t0, t0
-  bnez t0, L18
+  bnez t0, L25
   lw t0, 12(s0)
   addi sp, sp, -4
   sw t0, 0(sp)
@@ -336,15 +348,17 @@ L16:
   xor t0, t1, t0
   seqz t0, t0
   mv t0, t0
-  j L19
-L18:
+  j L26
+L25:
   li t0, 1
-L19:
-  beqz t0, L17
+L26:
+  beqz t0, L23
   li t0, 1
   mv a0, t0
   j combination_ret
-L17:
+  j L24
+L23:
+L24:
   lw t0, 8(s0)
   mv a0, t0
   call factorial
@@ -390,7 +404,7 @@ power:
   sw a1, 12(s0)
   li t0, 1
   sw t0, -20(s0)
-L20:
+L27:
   lw t0, 12(s0)
   addi sp, sp, -4
   sw t0, 0(sp)
@@ -398,7 +412,7 @@ L20:
   lw t1, 0(sp)
   addi sp, sp, 4
   sgt t0, t1, t0
-  beqz t0, L21
+  beqz t0, L28
   lw t0, 12(s0)
   addi sp, sp, -4
   sw t0, 0(sp)
@@ -413,7 +427,7 @@ L20:
   addi sp, sp, 4
   xor t0, t1, t0
   seqz t0, t0
-  beqz t0, L22
+  beqz t0, L29
   lw t0, -20(s0)
   addi sp, sp, -4
   sw t0, 0(sp)
@@ -422,7 +436,9 @@ L20:
   addi sp, sp, 4
   mul t0, t1, t0
   sw t0, -20(s0)
-L22:
+  j L30
+L29:
+L30:
   lw t0, 8(s0)
   addi sp, sp, -4
   sw t0, 0(sp)
@@ -439,8 +455,8 @@ L22:
   addi sp, sp, 4
   div t0, t1, t0
   sw t0, 12(s0)
-  j L20
-L21:
+  j L27
+L28:
   lw t0, -20(s0)
   mv a0, t0
   j power_ret
@@ -467,7 +483,7 @@ complexFunction:
   lw t1, 0(sp)
   addi sp, sp, 4
   sgt t0, t1, t0
-  beqz t0, L25
+  beqz t0, L33
   lw t0, 12(s0)
   addi sp, sp, -4
   sw t0, 0(sp)
@@ -476,12 +492,12 @@ complexFunction:
   addi sp, sp, 4
   sgt t0, t1, t0
   mv t0, t0
-  j L26
-L25:
+  j L34
+L33:
   li t0, 0
-L26:
+L34:
   seqz t0, t0
-  beqz t0, L23
+  beqz t0, L31
   lw t0, 8(s0)
   addi sp, sp, -4
   sw t0, 0(sp)
@@ -498,12 +514,13 @@ L26:
   lw t1, 0(sp)
   addi sp, sp, 4
   add t0, t1, t0
+  sub t0, zero, t0
   lw t1, 0(sp)
   addi sp, sp, 4
   sub t0, t1, t0
   sw t0, -20(s0)
-  j L24
-L23:
+  j L32
+L31:
   lw t0, 8(s0)
   addi sp, sp, -4
   sw t0, 0(sp)
@@ -512,7 +529,7 @@ L23:
   addi sp, sp, 4
   slt t0, t1, t0
   seqz t0, t0
-  bnez t0, L29
+  bnez t0, L37
   lw t0, 16(s0)
   addi sp, sp, -4
   sw t0, 0(sp)
@@ -521,11 +538,11 @@ L23:
   addi sp, sp, 4
   slt t0, t1, t0
   mv t0, t0
-  j L30
-L29:
+  j L38
+L37:
   li t0, 1
-L30:
-  beqz t0, L27
+L38:
+  beqz t0, L35
   lw t0, 8(s0)
   addi sp, sp, -4
   sw t0, 0(sp)
@@ -546,8 +563,8 @@ L30:
   addi sp, sp, 4
   mul t0, t1, t0
   sw t0, -20(s0)
-  j L28
-L27:
+  j L36
+L35:
   lw t0, 12(s0)
   addi sp, sp, -4
   sw t0, 0(sp)
@@ -556,7 +573,7 @@ L27:
   addi sp, sp, 4
   slt t0, t1, t0
   xori t0, t0, 1
-  beqz t0, L35
+  beqz t0, L43
   lw t0, 8(s0)
   addi sp, sp, -4
   sw t0, 0(sp)
@@ -566,11 +583,11 @@ L27:
   slt t0, t1, t0
   xori t0, t0, 1
   mv t0, t0
-  j L36
-L35:
+  j L44
+L43:
   li t0, 0
-L36:
-  bnez t0, L33
+L44:
+  bnez t0, L41
   lw t0, 12(s0)
   addi sp, sp, -4
   sw t0, 0(sp)
@@ -580,11 +597,11 @@ L36:
   sgt t0, t1, t0
   xori t0, t0, 1
   mv t0, t0
-  j L34
-L33:
+  j L42
+L41:
   li t0, 1
-L34:
-  beqz t0, L31
+L42:
+  beqz t0, L39
   lw t0, 12(s0)
   addi sp, sp, -4
   sw t0, 0(sp)
@@ -601,12 +618,13 @@ L34:
   lw t1, 0(sp)
   addi sp, sp, 4
   add t0, t1, t0
+  sub t0, zero, t0
   lw t1, 0(sp)
   addi sp, sp, 4
   sub t0, t1, t0
   sw t0, -20(s0)
-  j L32
-L31:
+  j L40
+L39:
   lw t0, 12(s0)
   addi sp, sp, -4
   sw t0, 0(sp)
@@ -614,7 +632,7 @@ L31:
   lw t1, 0(sp)
   addi sp, sp, 4
   sgt t0, t1, t0
-  bnez t0, L39
+  bnez t0, L47
   lw t0, 16(s0)
   addi sp, sp, -4
   sw t0, 0(sp)
@@ -622,7 +640,7 @@ L31:
   lw t1, 0(sp)
   addi sp, sp, 4
   sgt t0, t1, t0
-  beqz t0, L41
+  beqz t0, L49
   lw t0, 8(s0)
   addi sp, sp, -4
   sw t0, 0(sp)
@@ -632,16 +650,16 @@ L31:
   sgt t0, t1, t0
   xori t0, t0, 1
   mv t0, t0
-  j L42
-L41:
+  j L50
+L49:
   li t0, 0
-L42:
+L50:
   mv t0, t0
-  j L40
-L39:
+  j L48
+L47:
   li t0, 1
-L40:
-  beqz t0, L37
+L48:
+  beqz t0, L45
   lw t0, 12(s0)
   addi sp, sp, -4
   sw t0, 0(sp)
@@ -662,8 +680,8 @@ L40:
   addi sp, sp, 4
   mul t0, t1, t0
   sw t0, -20(s0)
-  j L38
-L37:
+  j L46
+L45:
   lw t0, 16(s0)
   addi sp, sp, -4
   sw t0, 0(sp)
@@ -671,7 +689,7 @@ L37:
   lw t1, 0(sp)
   addi sp, sp, 4
   sgt t0, t1, t0
-  bnez t0, L47
+  bnez t0, L55
   lw t0, 12(s0)
   addi sp, sp, -4
   sw t0, 0(sp)
@@ -681,12 +699,12 @@ L37:
   xor t0, t1, t0
   snez t0, t0
   mv t0, t0
-  j L48
-L47:
+  j L56
+L55:
   li t0, 1
-L48:
+L56:
   seqz t0, t0
-  beqz t0, L45
+  beqz t0, L53
   lw t0, 8(s0)
   addi sp, sp, -4
   sw t0, 0(sp)
@@ -696,11 +714,11 @@ L48:
   xor t0, t1, t0
   seqz t0, t0
   mv t0, t0
-  j L46
-L45:
+  j L54
+L53:
   li t0, 0
-L46:
-  beqz t0, L43
+L54:
+  beqz t0, L51
   lw t0, 16(s0)
   addi sp, sp, -4
   sw t0, 0(sp)
@@ -721,8 +739,8 @@ L46:
   addi sp, sp, 4
   sub t0, t1, t0
   sw t0, -20(s0)
-  j L44
-L43:
+  j L52
+L51:
   lw t0, 16(s0)
   addi sp, sp, -4
   sw t0, 0(sp)
@@ -730,6 +748,7 @@ L43:
   addi sp, sp, -4
   sw t0, 0(sp)
   lw t0, 8(s0)
+  sub t0, zero, t0
   lw t1, 0(sp)
   addi sp, sp, 4
   sub t0, t1, t0
@@ -743,14 +762,14 @@ L43:
   addi sp, sp, 4
   mul t0, t1, t0
   sw t0, -20(s0)
-L44:
-L38:
+L52:
+L46:
+L40:
+L36:
 L32:
-L28:
-L24:
   li t0, 0
   sw t0, -24(s0)
-L49:
+L57:
   lw t0, -24(s0)
   addi sp, sp, -4
   sw t0, 0(sp)
@@ -758,7 +777,7 @@ L49:
   lw t1, 0(sp)
   addi sp, sp, 4
   slt t0, t1, t0
-  beqz t0, L50
+  beqz t0, L58
   lw t0, -24(s0)
   addi sp, sp, -4
   sw t0, 0(sp)
@@ -781,7 +800,7 @@ L49:
   addi sp, sp, 4
   xor t0, t1, t0
   seqz t0, t0
-  beqz t0, L51
+  beqz t0, L59
   lw t0, -20(s0)
   addi sp, sp, -4
   sw t0, 0(sp)
@@ -790,8 +809,8 @@ L49:
   addi sp, sp, 4
   add t0, t1, t0
   sw t0, -20(s0)
-  j L52
-L51:
+  j L60
+L59:
   lw t0, -24(s0)
   addi sp, sp, -4
   sw t0, 0(sp)
@@ -806,7 +825,7 @@ L51:
   addi sp, sp, 4
   xor t0, t1, t0
   seqz t0, t0
-  beqz t0, L53
+  beqz t0, L61
   lw t0, -20(s0)
   addi sp, sp, -4
   sw t0, 0(sp)
@@ -815,8 +834,8 @@ L51:
   addi sp, sp, 4
   sub t0, t1, t0
   sw t0, -20(s0)
-  j L54
-L53:
+  j L62
+L61:
   lw t0, -20(s0)
   addi sp, sp, -4
   sw t0, 0(sp)
@@ -832,9 +851,11 @@ L53:
   lw t1, 0(sp)
   addi sp, sp, 4
   slt t0, t1, t0
-  beqz t0, L55
-  j L49
-L55:
+  beqz t0, L63
+  j L57
+  j L64
+L63:
+L64:
   lw t0, -20(s0)
   addi sp, sp, -4
   sw t0, 0(sp)
@@ -850,13 +871,15 @@ L55:
   lw t1, 0(sp)
   addi sp, sp, 4
   sgt t0, t1, t0
-  beqz t0, L56
-  j L50
-L56:
-L54:
-L52:
-  j L49
-L50:
+  beqz t0, L65
+  j L58
+  j L66
+L65:
+L66:
+L62:
+L60:
+  j L57
+L58:
   lw t0, -20(s0)
   mv a0, t0
   j complexFunction_ret
@@ -882,7 +905,7 @@ shortCircuit:
   lw t1, 0(sp)
   addi sp, sp, 4
   sgt t0, t1, t0
-  beqz t0, L58
+  beqz t0, L69
   lw t0, 12(s0)
   addi sp, sp, -4
   sw t0, 0(sp)
@@ -897,11 +920,11 @@ shortCircuit:
   addi sp, sp, 4
   sgt t0, t1, t0
   mv t0, t0
-  j L59
-L58:
+  j L70
+L69:
   li t0, 0
-L59:
-  beqz t0, L57
+L70:
+  beqz t0, L67
   lw t0, -20(s0)
   addi sp, sp, -4
   sw t0, 0(sp)
@@ -910,7 +933,9 @@ L59:
   addi sp, sp, 4
   add t0, t1, t0
   sw t0, -20(s0)
-L57:
+  j L68
+L67:
+L68:
   lw t0, 8(s0)
   addi sp, sp, -4
   sw t0, 0(sp)
@@ -918,7 +943,7 @@ L57:
   lw t1, 0(sp)
   addi sp, sp, 4
   slt t0, t1, t0
-  bnez t0, L61
+  bnez t0, L73
   lw t0, 12(s0)
   addi sp, sp, -4
   sw t0, 0(sp)
@@ -945,11 +970,11 @@ L57:
   addi sp, sp, 4
   slt t0, t1, t0
   mv t0, t0
-  j L62
-L61:
+  j L74
+L73:
   li t0, 1
-L62:
-  beqz t0, L60
+L74:
+  beqz t0, L71
   lw t0, -20(s0)
   addi sp, sp, -4
   sw t0, 0(sp)
@@ -958,7 +983,9 @@ L62:
   addi sp, sp, 4
   add t0, t1, t0
   sw t0, -20(s0)
-L60:
+  j L72
+L71:
+L72:
   lw t0, -20(s0)
   mv a0, t0
   j shortCircuit_ret
@@ -978,7 +1005,7 @@ nestedLoopsAndConditions:
   sw t0, -20(s0)
   li t0, 0
   sw t0, -24(s0)
-L63:
+L75:
   lw t0, -24(s0)
   addi sp, sp, -4
   sw t0, 0(sp)
@@ -986,10 +1013,10 @@ L63:
   lw t1, 0(sp)
   addi sp, sp, 4
   slt t0, t1, t0
-  beqz t0, L64
+  beqz t0, L76
   li t0, 0
   sw t0, -28(s0)
-L65:
+L77:
   lw t0, -28(s0)
   addi sp, sp, -4
   sw t0, 0(sp)
@@ -997,7 +1024,7 @@ L65:
   lw t1, 0(sp)
   addi sp, sp, 4
   slt t0, t1, t0
-  beqz t0, L66
+  beqz t0, L78
   lw t0, -24(s0)
   addi sp, sp, -4
   sw t0, 0(sp)
@@ -1018,7 +1045,7 @@ L65:
   addi sp, sp, 4
   xor t0, t1, t0
   seqz t0, t0
-  beqz t0, L67
+  beqz t0, L79
   lw t0, -20(s0)
   addi sp, sp, -4
   sw t0, 0(sp)
@@ -1033,8 +1060,8 @@ L65:
   addi sp, sp, 4
   sub t0, t1, t0
   sw t0, -20(s0)
-  j L68
-L67:
+  j L80
+L79:
   lw t0, -20(s0)
   addi sp, sp, -4
   sw t0, 0(sp)
@@ -1056,12 +1083,14 @@ L67:
   lw t1, 0(sp)
   addi sp, sp, 4
   slt t0, t1, t0
-  beqz t0, L69
+  beqz t0, L81
   li t0, 0
   sw t0, -20(s0)
-  j L65
-L69:
-L68:
+  j L77
+  j L82
+L81:
+L82:
+L80:
   lw t0, -20(s0)
   addi sp, sp, -4
   sw t0, 0(sp)
@@ -1069,9 +1098,11 @@ L68:
   lw t1, 0(sp)
   addi sp, sp, 4
   sgt t0, t1, t0
-  beqz t0, L70
-  j L66
-L70:
+  beqz t0, L83
+  j L78
+  j L84
+L83:
+L84:
   lw t0, -28(s0)
   addi sp, sp, -4
   sw t0, 0(sp)
@@ -1080,8 +1111,8 @@ L70:
   addi sp, sp, 4
   add t0, t1, t0
   sw t0, -28(s0)
-  j L65
-L66:
+  j L77
+L78:
   lw t0, -20(s0)
   addi sp, sp, -4
   sw t0, 0(sp)
@@ -1089,9 +1120,11 @@ L66:
   lw t1, 0(sp)
   addi sp, sp, 4
   sgt t0, t1, t0
-  beqz t0, L71
-  j L64
-L71:
+  beqz t0, L85
+  j L76
+  j L86
+L85:
+L86:
   lw t0, -24(s0)
   addi sp, sp, -4
   sw t0, 0(sp)
@@ -1100,8 +1133,8 @@ L71:
   addi sp, sp, 4
   add t0, t1, t0
   sw t0, -24(s0)
-  j L63
-L64:
+  j L75
+L76:
   lw t0, -20(s0)
   mv a0, t0
   j nestedLoopsAndConditions_ret
@@ -1127,7 +1160,7 @@ func1:
   addi sp, sp, 4
   xor t0, t1, t0
   seqz t0, t0
-  beqz t0, L72
+  beqz t0, L87
   lw t0, 8(s0)
   addi sp, sp, -4
   sw t0, 0(sp)
@@ -1137,8 +1170,8 @@ func1:
   mul t0, t1, t0
   mv a0, t0
   j func1_ret
-  j L73
-L72:
+  j L88
+L87:
   lw t0, 8(s0)
   mv a0, t0
   lw t0, 12(s0)
@@ -1155,7 +1188,7 @@ L72:
   mv t0, a0
   mv a0, t0
   j func1_ret
-L73:
+L88:
 func1_ret:
   lw ra, 28(sp)
   lw s0, 24(sp)
@@ -1170,7 +1203,7 @@ func2:
   sw a0, 8(s0)
   sw a1, 12(s0)
   lw t0, 12(s0)
-  beqz t0, L74
+  beqz t0, L89
   lw t0, 8(s0)
   addi sp, sp, -4
   sw t0, 0(sp)
@@ -1185,12 +1218,12 @@ func2:
   mv t0, a0
   mv a0, t0
   j func2_ret
-  j L75
-L74:
+  j L90
+L89:
   lw t0, 8(s0)
   mv a0, t0
   j func2_ret
-L75:
+L90:
 func2_ret:
   lw ra, 28(sp)
   lw s0, 24(sp)
@@ -1212,7 +1245,7 @@ func3:
   addi sp, sp, 4
   xor t0, t1, t0
   seqz t0, t0
-  beqz t0, L76
+  beqz t0, L91
   lw t0, 8(s0)
   addi sp, sp, -4
   sw t0, 0(sp)
@@ -1222,8 +1255,8 @@ func3:
   add t0, t1, t0
   mv a0, t0
   j func3_ret
-  j L77
-L76:
+  j L92
+L91:
   lw t0, 8(s0)
   addi sp, sp, -4
   sw t0, 0(sp)
@@ -1238,7 +1271,7 @@ L76:
   mv t0, a0
   mv a0, t0
   j func3_ret
-L77:
+L92:
 func3_ret:
   lw ra, 28(sp)
   lw s0, 24(sp)
@@ -1254,16 +1287,16 @@ func4:
   sw a1, 12(s0)
   sw a2, 16(s0)
   lw t0, 8(s0)
-  beqz t0, L78
+  beqz t0, L93
   lw t0, 12(s0)
   mv a0, t0
   j func4_ret
-  j L79
-L78:
+  j L94
+L93:
   lw t0, 16(s0)
   mv a0, t0
   j func4_ret
-L79:
+L94:
 func4_ret:
   lw ra, 28(sp)
   lw s0, 24(sp)
@@ -1277,6 +1310,7 @@ func5:
   addi s0, sp, 32
   sw a0, 8(s0)
   lw t0, 8(s0)
+  sub t0, zero, t0
   mv a0, t0
   j func5_ret
 func5_ret:
@@ -1293,23 +1327,23 @@ func6:
   sw a0, 8(s0)
   sw a1, 12(s0)
   lw t0, 8(s0)
-  beqz t0, L82
+  beqz t0, L97
   lw t0, 12(s0)
   mv t0, t0
-  j L83
-L82:
+  j L98
+L97:
   li t0, 0
-L83:
-  beqz t0, L80
+L98:
+  beqz t0, L95
   li t0, 1
   mv a0, t0
   j func6_ret
-  j L81
-L80:
+  j L96
+L95:
   li t0, 0
   mv a0, t0
   j func6_ret
-L81:
+L96:
 func6_ret:
   lw ra, 28(sp)
   lw s0, 24(sp)
@@ -1324,16 +1358,16 @@ func7:
   sw a0, 8(s0)
   lw t0, 8(s0)
   seqz t0, t0
-  beqz t0, L84
+  beqz t0, L99
   li t0, 1
   mv a0, t0
   j func7_ret
-  j L85
-L84:
+  j L100
+L99:
   li t0, 0
   mv a0, t0
   j func7_ret
-L85:
+L100:
 func7_ret:
   lw ra, 28(sp)
   lw s0, 24(sp)

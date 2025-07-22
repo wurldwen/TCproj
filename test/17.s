@@ -26,7 +26,9 @@ factorial:
   li t0, 1
   mv a0, t0
   j factorial_ret
+  j L2
 L1:
+L2:
   lw t0, 8(s0)
   addi sp, sp, -4
   sw t0, 0(sp)
@@ -65,11 +67,13 @@ fibonacci:
   addi sp, sp, 4
   sgt t0, t1, t0
   xori t0, t0, 1
-  beqz t0, L2
+  beqz t0, L3
   li t0, 0
   mv a0, t0
   j fibonacci_ret
-L2:
+  j L4
+L3:
+L4:
   lw t0, 8(s0)
   addi sp, sp, -4
   sw t0, 0(sp)
@@ -78,11 +82,13 @@ L2:
   addi sp, sp, 4
   xor t0, t1, t0
   seqz t0, t0
-  beqz t0, L3
+  beqz t0, L5
   li t0, 1
   mv a0, t0
   j fibonacci_ret
-L3:
+  j L6
+L5:
+L6:
   lw t0, 8(s0)
   addi sp, sp, -4
   sw t0, 0(sp)
@@ -131,11 +137,13 @@ gcd:
   addi sp, sp, 4
   xor t0, t1, t0
   seqz t0, t0
-  beqz t0, L4
+  beqz t0, L7
   lw t0, 8(s0)
   mv a0, t0
   j gcd_ret
-L4:
+  j L8
+L7:
+L8:
   lw t0, 12(s0)
   mv a0, t0
   lw t0, 8(s0)
@@ -170,11 +178,13 @@ is_prime:
   addi sp, sp, 4
   sgt t0, t1, t0
   xori t0, t0, 1
-  beqz t0, L5
+  beqz t0, L9
   li t0, 0
   mv a0, t0
   j is_prime_ret
-L5:
+  j L10
+L9:
+L10:
   lw t0, 8(s0)
   addi sp, sp, -4
   sw t0, 0(sp)
@@ -183,11 +193,13 @@ L5:
   addi sp, sp, 4
   sgt t0, t1, t0
   xori t0, t0, 1
-  beqz t0, L6
+  beqz t0, L11
   li t0, 1
   mv a0, t0
   j is_prime_ret
-L6:
+  j L12
+L11:
+L12:
   lw t0, 8(s0)
   addi sp, sp, -4
   sw t0, 0(sp)
@@ -202,7 +214,7 @@ L6:
   addi sp, sp, 4
   xor t0, t1, t0
   seqz t0, t0
-  bnez t0, L8
+  bnez t0, L15
   lw t0, 8(s0)
   addi sp, sp, -4
   sw t0, 0(sp)
@@ -218,18 +230,20 @@ L6:
   xor t0, t1, t0
   seqz t0, t0
   mv t0, t0
-  j L9
-L8:
+  j L16
+L15:
   li t0, 1
-L9:
-  beqz t0, L7
+L16:
+  beqz t0, L13
   li t0, 0
   mv a0, t0
   j is_prime_ret
-L7:
+  j L14
+L13:
+L14:
   li t0, 5
   sw t0, -20(s0)
-L10:
+L17:
   lw t0, -20(s0)
   addi sp, sp, -4
   sw t0, 0(sp)
@@ -244,7 +258,7 @@ L10:
   addi sp, sp, 4
   sgt t0, t1, t0
   xori t0, t0, 1
-  beqz t0, L11
+  beqz t0, L18
   lw t0, 8(s0)
   addi sp, sp, -4
   sw t0, 0(sp)
@@ -259,7 +273,7 @@ L10:
   addi sp, sp, 4
   xor t0, t1, t0
   seqz t0, t0
-  bnez t0, L13
+  bnez t0, L21
   lw t0, 8(s0)
   addi sp, sp, -4
   sw t0, 0(sp)
@@ -281,15 +295,17 @@ L10:
   xor t0, t1, t0
   seqz t0, t0
   mv t0, t0
-  j L14
-L13:
+  j L22
+L21:
   li t0, 1
-L14:
-  beqz t0, L12
+L22:
+  beqz t0, L19
   li t0, 0
   mv a0, t0
   j is_prime_ret
-L12:
+  j L20
+L19:
+L20:
   lw t0, -20(s0)
   addi sp, sp, -4
   sw t0, 0(sp)
@@ -298,8 +314,8 @@ L12:
   addi sp, sp, 4
   add t0, t1, t0
   sw t0, -20(s0)
-  j L10
-L11:
+  j L17
+L18:
   li t0, 1
   mv a0, t0
   j is_prime_ret
@@ -362,6 +378,7 @@ main:
   addi sp, sp, -4
   sw t0, 0(sp)
   lw t0, -32(s0)
+  sub t0, zero, t0
   lw t1, 0(sp)
   addi sp, sp, 4
   add t0, t1, t0
@@ -435,7 +452,7 @@ main:
   lw t1, 0(sp)
   addi sp, sp, 4
   sgt t0, t1, t0
-  beqz t0, L16
+  beqz t0, L25
   lw t0, -48(s0)
   addi sp, sp, -4
   sw t0, 0(sp)
@@ -451,14 +468,16 @@ main:
   xor t0, t1, t0
   seqz t0, t0
   mv t0, t0
-  j L17
-L16:
+  j L26
+L25:
   li t0, 0
-L17:
-  beqz t0, L15
+L26:
+  beqz t0, L23
   li t0, 1
   sw t0, -52(s0)
-L15:
+  j L24
+L23:
+L24:
   li t0, 0
   sw t0, -56(s0)
   lw t0, -40(s0)
@@ -468,7 +487,7 @@ L15:
   lw t1, 0(sp)
   addi sp, sp, 4
   slt t0, t1, t0
-  bnez t0, L19
+  bnez t0, L29
   lw t0, -48(s0)
   addi sp, sp, -4
   sw t0, 0(sp)
@@ -484,14 +503,16 @@ L15:
   xor t0, t1, t0
   seqz t0, t0
   mv t0, t0
-  j L20
-L19:
+  j L30
+L29:
   li t0, 1
-L20:
-  beqz t0, L18
+L30:
+  beqz t0, L27
   li t0, 1
   sw t0, -56(s0)
-L18:
+  j L28
+L27:
+L28:
   li t0, 0
   sw t0, -60(s0)
   lw t0, -40(s0)
@@ -501,7 +522,7 @@ L18:
   lw t1, 0(sp)
   addi sp, sp, 4
   sgt t0, t1, t0
-  beqz t0, L26
+  beqz t0, L37
   lw t0, -44(s0)
   addi sp, sp, -4
   sw t0, 0(sp)
@@ -510,11 +531,11 @@ L18:
   addi sp, sp, 4
   slt t0, t1, t0
   mv t0, t0
-  j L27
-L26:
+  j L38
+L37:
   li t0, 0
-L27:
-  bnez t0, L24
+L38:
+  bnez t0, L35
   lw t0, -48(s0)
   addi sp, sp, -4
   sw t0, 0(sp)
@@ -522,7 +543,7 @@ L27:
   lw t1, 0(sp)
   addi sp, sp, 4
   sgt t0, t1, t0
-  beqz t0, L28
+  beqz t0, L39
   lw t0, -40(s0)
   addi sp, sp, -4
   sw t0, 0(sp)
@@ -531,17 +552,17 @@ L27:
   addi sp, sp, 4
   slt t0, t1, t0
   mv t0, t0
-  j L29
-L28:
+  j L40
+L39:
   li t0, 0
-L29:
+L40:
   mv t0, t0
-  j L25
-L24:
+  j L36
+L35:
   li t0, 1
-L25:
+L36:
   seqz t0, t0
-  beqz t0, L22
+  beqz t0, L33
   lw t0, -44(s0)
   addi sp, sp, -4
   sw t0, 0(sp)
@@ -549,7 +570,7 @@ L25:
   lw t1, 0(sp)
   addi sp, sp, 4
   sgt t0, t1, t0
-  bnez t0, L30
+  bnez t0, L41
   lw t0, -40(s0)
   addi sp, sp, -4
   sw t0, 0(sp)
@@ -558,19 +579,21 @@ L25:
   addi sp, sp, 4
   slt t0, t1, t0
   mv t0, t0
-  j L31
-L30:
+  j L42
+L41:
   li t0, 1
-L31:
+L42:
   mv t0, t0
-  j L23
-L22:
+  j L34
+L33:
   li t0, 0
-L23:
-  beqz t0, L21
+L34:
+  beqz t0, L31
   li t0, 1
   sw t0, -60(s0)
-L21:
+  j L32
+L31:
+L32:
   li t0, 42
   sw t0, -64(s0)
   li t0, 56
@@ -611,7 +634,7 @@ L21:
   lw t1, 0(sp)
   addi sp, sp, 4
   sgt t0, t1, t0
-  beqz t0, L34
+  beqz t0, L45
   lw t0, -64(s0)
   addi sp, sp, -4
   sw t0, 0(sp)
@@ -620,15 +643,15 @@ L21:
   addi sp, sp, 4
   sgt t0, t1, t0
   mv t0, t0
-  j L35
-L34:
+  j L46
+L45:
   li t0, 0
-L35:
-  beqz t0, L32
+L46:
+  beqz t0, L43
   lw t0, -64(s0)
   sw t0, -80(s0)
-  j L33
-L32:
+  j L44
+L43:
   lw t0, -68(s0)
   addi sp, sp, -4
   sw t0, 0(sp)
@@ -636,7 +659,7 @@ L32:
   lw t1, 0(sp)
   addi sp, sp, 4
   sgt t0, t1, t0
-  beqz t0, L38
+  beqz t0, L49
   lw t0, -68(s0)
   addi sp, sp, -4
   sw t0, 0(sp)
@@ -645,24 +668,24 @@ L32:
   addi sp, sp, 4
   sgt t0, t1, t0
   mv t0, t0
-  j L39
-L38:
+  j L50
+L49:
   li t0, 0
-L39:
-  beqz t0, L36
+L50:
+  beqz t0, L47
   lw t0, -68(s0)
   sw t0, -80(s0)
-  j L37
-L36:
+  j L48
+L47:
   lw t0, -72(s0)
   sw t0, -80(s0)
-L37:
-L33:
+L48:
+L44:
   li t0, 0
   sw t0, -84(s0)
   li t0, 1
   sw t0, -88(s0)
-L40:
+L51:
   lw t0, -88(s0)
   addi sp, sp, -4
   sw t0, 0(sp)
@@ -671,7 +694,7 @@ L40:
   addi sp, sp, 4
   sgt t0, t1, t0
   xori t0, t0, 1
-  beqz t0, L41
+  beqz t0, L52
   lw t0, -88(s0)
   addi sp, sp, -4
   sw t0, 0(sp)
@@ -686,7 +709,7 @@ L40:
   addi sp, sp, 4
   xor t0, t1, t0
   seqz t0, t0
-  beqz t0, L42
+  beqz t0, L53
   lw t0, -84(s0)
   addi sp, sp, -4
   sw t0, 0(sp)
@@ -701,8 +724,8 @@ L40:
   addi sp, sp, 4
   add t0, t1, t0
   sw t0, -84(s0)
-  j L43
-L42:
+  j L54
+L53:
   lw t0, -88(s0)
   addi sp, sp, -4
   sw t0, 0(sp)
@@ -717,7 +740,7 @@ L42:
   addi sp, sp, 4
   xor t0, t1, t0
   seqz t0, t0
-  beqz t0, L44
+  beqz t0, L55
   lw t0, -84(s0)
   addi sp, sp, -4
   sw t0, 0(sp)
@@ -738,8 +761,8 @@ L42:
   addi sp, sp, 4
   add t0, t1, t0
   sw t0, -84(s0)
-  j L45
-L44:
+  j L56
+L55:
   lw t0, -84(s0)
   addi sp, sp, -4
   sw t0, 0(sp)
@@ -748,8 +771,8 @@ L44:
   addi sp, sp, 4
   add t0, t1, t0
   sw t0, -84(s0)
-L45:
-L43:
+L56:
+L54:
   lw t0, -88(s0)
   addi sp, sp, -4
   sw t0, 0(sp)
@@ -758,13 +781,13 @@ L43:
   addi sp, sp, 4
   add t0, t1, t0
   sw t0, -88(s0)
-  j L40
-L41:
+  j L51
+L52:
   li t0, 0
   sw t0, -92(s0)
   li t0, 1
   sw t0, -88(s0)
-L46:
+L57:
   lw t0, -88(s0)
   addi sp, sp, -4
   sw t0, 0(sp)
@@ -773,12 +796,12 @@ L46:
   addi sp, sp, 4
   sgt t0, t1, t0
   xori t0, t0, 1
-  beqz t0, L47
+  beqz t0, L58
   li t0, 1
   sw t0, -96(s0)
   li t0, 1
   sw t0, -100(s0)
-L48:
+L59:
   lw t0, -96(s0)
   addi sp, sp, -4
   sw t0, 0(sp)
@@ -787,7 +810,7 @@ L48:
   addi sp, sp, 4
   sgt t0, t1, t0
   xori t0, t0, 1
-  beqz t0, L49
+  beqz t0, L60
   lw t0, -100(s0)
   addi sp, sp, -4
   sw t0, 0(sp)
@@ -804,8 +827,8 @@ L48:
   addi sp, sp, 4
   add t0, t1, t0
   sw t0, -96(s0)
-  j L48
-L49:
+  j L59
+L60:
   lw t0, -92(s0)
   addi sp, sp, -4
   sw t0, 0(sp)
@@ -822,85 +845,85 @@ L49:
   addi sp, sp, 4
   add t0, t1, t0
   sw t0, -88(s0)
-  j L46
-L47:
-  li t0, 0
-  sw t0, -104(s0)
-  lw t0, -64(s0)
-  mv a0, t0
-  call is_prime
-  mv t0, a0
-  beqz t0, L50
-  lw t0, -68(s0)
-  mv a0, t0
-  call is_prime
-  mv t0, a0
-  beqz t0, L52
-  lw t0, -64(s0)
-  addi sp, sp, -4
-  sw t0, 0(sp)
-  lw t0, -68(s0)
-  lw t1, 0(sp)
-  addi sp, sp, 4
-  mul t0, t1, t0
-  sw t0, -104(s0)
-  j L53
-L52:
-  lw t0, -72(s0)
-  mv a0, t0
-  call is_prime
-  mv t0, a0
-  beqz t0, L54
-  lw t0, -64(s0)
-  addi sp, sp, -4
-  sw t0, 0(sp)
-  lw t0, -72(s0)
-  lw t1, 0(sp)
-  addi sp, sp, 4
-  mul t0, t1, t0
-  sw t0, -104(s0)
-  j L55
-L54:
-  lw t0, -64(s0)
-  sw t0, -104(s0)
-L55:
-L53:
-  j L51
-L50:
-  lw t0, -68(s0)
-  mv a0, t0
-  call is_prime
-  mv t0, a0
-  beqz t0, L56
-  lw t0, -72(s0)
-  mv a0, t0
-  call is_prime
-  mv t0, a0
-  beqz t0, L58
-  lw t0, -68(s0)
-  addi sp, sp, -4
-  sw t0, 0(sp)
-  lw t0, -72(s0)
-  lw t1, 0(sp)
-  addi sp, sp, 4
-  mul t0, t1, t0
-  sw t0, -104(s0)
-  j L59
-L58:
-  lw t0, -68(s0)
-  sw t0, -104(s0)
-L59:
   j L57
-L56:
+L58:
+  li t0, 0
+  sw t0, -96(s0)
+  lw t0, -64(s0)
+  mv a0, t0
+  call is_prime
+  mv t0, a0
+  beqz t0, L61
+  lw t0, -68(s0)
+  mv a0, t0
+  call is_prime
+  mv t0, a0
+  beqz t0, L63
+  lw t0, -64(s0)
+  addi sp, sp, -4
+  sw t0, 0(sp)
+  lw t0, -68(s0)
+  lw t1, 0(sp)
+  addi sp, sp, 4
+  mul t0, t1, t0
+  sw t0, -96(s0)
+  j L64
+L63:
   lw t0, -72(s0)
   mv a0, t0
   call is_prime
   mv t0, a0
-  beqz t0, L60
+  beqz t0, L65
+  lw t0, -64(s0)
+  addi sp, sp, -4
+  sw t0, 0(sp)
   lw t0, -72(s0)
-  sw t0, -104(s0)
-  j L61
-L60:
+  lw t1, 0(sp)
+  addi sp, sp, 4
+  mul t0, t1, t0
+  sw t0, -96(s0)
+  j L66
+L65:
+  lw t0, -64(s0)
+  sw t0, -96(s0)
+L66:
+L64:
+  j L62
+L61:
+  lw t0, -68(s0)
+  mv a0, t0
+  call is_prime
+  mv t0, a0
+  beqz t0, L67
+  lw t0, -72(s0)
+  mv a0, t0
+  call is_prime
+  mv t0, a0
+  beqz t0, L69
+  lw t0, -68(s0)
+  addi sp, sp, -4
+  sw t0, 0(sp)
+  lw t0, -72(s0)
+  lw t1, 0(sp)
+  addi sp, sp, 4
+  mul t0, t1, t0
+  sw t0, -96(s0)
+  j L70
+L69:
+  lw t0, -68(s0)
+  sw t0, -96(s0)
+L70:
+  j L68
+L67:
+  lw t0, -72(s0)
+  mv a0, t0
+  call is_prime
+  mv t0, a0
+  beqz t0, L71
+  lw t0, -72(s0)
+  sw t0, -96(s0)
+  j L72
+L71:
   lw t0, -64(s0)
   addi sp, sp, -4
   sw t0, 0(sp)
@@ -914,26 +937,26 @@ L60:
   lw t1, 0(sp)
   addi sp, sp, 4
   add t0, t1, t0
+  sw t0, -96(s0)
+L72:
+L68:
+L62:
+  li t0, 0
+  sw t0, -100(s0)
+  li t0, 2345
   sw t0, -104(s0)
-L61:
-L57:
-L51:
   li t0, 0
   sw t0, -108(s0)
-  li t0, 2345
-  sw t0, -112(s0)
-  li t0, 0
-  sw t0, -116(s0)
-L62:
-  lw t0, -112(s0)
+L73:
+  lw t0, -104(s0)
   addi sp, sp, -4
   sw t0, 0(sp)
   li t0, 0
   lw t1, 0(sp)
   addi sp, sp, 4
   sgt t0, t1, t0
-  beqz t0, L63
-  lw t0, -112(s0)
+  beqz t0, L74
+  lw t0, -104(s0)
   addi sp, sp, -4
   sw t0, 0(sp)
   li t0, 2
@@ -947,26 +970,28 @@ L62:
   addi sp, sp, 4
   xor t0, t1, t0
   seqz t0, t0
-  beqz t0, L64
-  lw t0, -116(s0)
+  beqz t0, L75
+  lw t0, -108(s0)
   addi sp, sp, -4
   sw t0, 0(sp)
   li t0, 1
   lw t1, 0(sp)
   addi sp, sp, 4
   add t0, t1, t0
-  sw t0, -116(s0)
-L64:
-  lw t0, -112(s0)
+  sw t0, -108(s0)
+  j L76
+L75:
+L76:
+  lw t0, -104(s0)
   addi sp, sp, -4
   sw t0, 0(sp)
   li t0, 2
   lw t1, 0(sp)
   addi sp, sp, 4
   div t0, t1, t0
-  sw t0, -112(s0)
-  j L62
-L63:
+  sw t0, -104(s0)
+  j L73
+L74:
   lw t0, -36(s0)
   addi sp, sp, -4
   sw t0, 0(sp)
@@ -1012,28 +1037,28 @@ L63:
   add t0, t1, t0
   addi sp, sp, -4
   sw t0, 0(sp)
-  lw t0, -104(s0)
+  lw t0, -96(s0)
   lw t1, 0(sp)
   addi sp, sp, 4
   add t0, t1, t0
   addi sp, sp, -4
   sw t0, 0(sp)
-  lw t0, -116(s0)
+  lw t0, -108(s0)
   lw t1, 0(sp)
   addi sp, sp, 4
   add t0, t1, t0
-  sw t0, -120(s0)
+  sw t0, -112(s0)
   li t0, 0
-  sw t0, -124(s0)
-  lw t0, -120(s0)
+  sw t0, -116(s0)
+  lw t0, -112(s0)
   addi sp, sp, -4
   sw t0, 0(sp)
   li t0, 256
   lw t1, 0(sp)
   addi sp, sp, 4
   rem t0, t1, t0
-  sw t0, -124(s0)
-  lw t0, -124(s0)
+  sw t0, -116(s0)
+  lw t0, -116(s0)
   mv a0, t0
   j main_ret
 main_ret:
