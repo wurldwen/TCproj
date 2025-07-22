@@ -21,7 +21,7 @@
 %left ADD SUB
 %left MUL DIV MOD
 %right NOT
-%right UMINUS
+%right UMINUS UPLUS
 %nonassoc NOELSE
 %nonassoc ELSE
 
@@ -79,7 +79,10 @@ expr:
   | NUM { Num $1 }
   | ID { Var $1 }
   | LPAREN expr RPAREN { $2 }
+  | SUB expr %prec UPLUS { $2 }
   | SUB expr %prec UMINUS { Neg $2 }
+  | ADD expr %prec UPLUS { $2 }
+  | ADD expr %prec UMINUS { Neg $2 }
   | NOT expr { Not $2 }
   // | expr binop expr { Binop ($1, $2, $3) }
   // | ID LPAREN args RPAREN { Call ($1, $3) }

@@ -31,12 +31,34 @@ let lexbuf = Lexing.from_string source in
 lexbuf.lex_curr_p <- { lexbuf.lex_curr_p with pos_fname = input_file };
 
 let ast = 
-try Parser.program Lexer.token lexbuf 
-with Parsing.Parse_error ->
-let pos = lexbuf.lex_curr_p in
-let msg = sprintf "语法错误在 %s:%d:%d" 
-pos.pos_fname pos.pos_lnum (pos.pos_cnum - pos.pos_bol) in
-failwith msg
+  try Parser.program Lexer.token lexbuf 
+  with Parsing.Parse_error ->
+    let pos = lexbuf.lex_curr_p in
+    let char_pos = pos.pos_cnum - pos.pos_bol in
+    
+    (* 获取错误位置的上下文 *)
+    let lines = String.split_on_char '\n' source in
+    let error_line = if pos.pos_lnum <= List.length lines then
+      List.nth lines (pos.pos_lnum - 1)
+    else "无法获取错误行" in
+    
+    (* 打印详细错误信息 *)
+    printf "=== 语法错误详情 ===\n";
+    printf "文件: %s\n" pos.pos_fname;
+    printf "行号: %d\n" pos.pos_lnum;
+    printf "字符位置: %d\n" char_pos;
+    printf "全局字符位置: %d\n" pos.pos_cnum;
+    printf "错误行内容: %s\n" error_line;
+    
+    (* 显示错误位置的指示器 *)
+    if char_pos > 0 && char_pos <= String.length error_line then (
+      printf "错误位置: %s^\n" (String.make (char_pos - 1) ' ');
+      printf "错误字符: '%c'\n" error_line.[char_pos - 1];
+    );
+    
+    let msg = sprintf "语法错误在 %s:%d:%d" 
+      pos.pos_fname pos.pos_lnum char_pos in
+    failwith msg
 in
 printf "[INFO] 语法分析完成，生成AST\n";
 

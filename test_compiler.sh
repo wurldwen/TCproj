@@ -5,9 +5,10 @@ echo "=== 编译器测试 ==="
 
 # 测试用例和预期结果
 declare -A tests
-tests["01_minimal.tc"]="0"
-tests["02_assignment.tc"]="3"
-tests["14_nested_if_while.tc"]="6"
+tests["17.tc"]="159"
+tests["19.tc"]="124"
+tests["20.tc"]="104"
+tests["check.tc"]="1"
 
 for test_file in "${!tests[@]}"; do
     expected="${tests[$test_file]}"

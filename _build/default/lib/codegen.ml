@@ -102,6 +102,10 @@ let rec gen_expr env oc = function
       | _ -> ())
   | Call (fname, args) ->
       let n = List.length args in
+      (* 计算需要通过栈传递的参数数量 *)
+      let stack_args = max 0 (n - 8) in
+      
+      (* 生成参数代码 *)
       List.iteri (fun i arg ->
         gen_expr env oc arg;
         if i < 8 then
@@ -111,21 +115,28 @@ let rec gen_expr env oc = function
           Printf.fprintf oc "  sw %s, 0(%s)\n" t0 sp
         )
       ) args;
+      
+      (* 调用函数 *)
       Printf.fprintf oc "  call %s\n" fname;
-      if n > 8 then
-        Printf.fprintf oc "  addi %s, %s, %d\n" sp sp ((n-8)*4);
+      
+      (* 恢复栈指针 - 只恢复超过8个参数的部分 *)
+      if stack_args > 0 then
+        Printf.fprintf oc "  addi %s, %s, %d\n" sp sp (stack_args * 4);
+      
       Printf.fprintf oc "  mv %s, %s\n" t0 a0
 
 (* 生成语句代码 *)
 let rec gen_stmt env oc ret_label break_label cont_label = function
   | Block stmts ->
-      let old_env = env in
+      (* 修正：需要传递环境变化，但在块结束时恢复作用域 *)
+      let old_var_offset = env.var_offset in
       let rec aux env = function
         | [] -> env
         | s::ss -> aux (gen_stmt env oc ret_label break_label cont_label s) ss
       in
-      ignore (aux env stmts);
-      old_env
+      let final_env = aux env stmts in
+      (* 恢复变量作用域，但保持当前偏移以正确计算栈大小 *)
+      { var_offset = old_var_offset; current_offset = final_env.current_offset }
   | Expr e -> gen_expr env oc e; env
   | VarDecl (_, id, e) ->
       let new_env = add_local_var env id in
@@ -139,16 +150,29 @@ let rec gen_stmt env oc ret_label break_label cont_label = function
       Printf.fprintf oc "  sw %s, %d(%s)\n" t0 offset fp;
       env
   | If (cond, s1, s2_opt) ->
-      let else_label = new_label () in
-      let end_label = new_label () in
-      gen_expr env oc cond;
-      Printf.fprintf oc "  beqz %s, %s\n" t0 else_label;
-      let env1 = gen_stmt env oc ret_label break_label cont_label s1 in
-      Printf.fprintf oc "  j %s\n" end_label;
-      Printf.fprintf oc "%s:\n" else_label;
-      let env2 = match s2_opt with Some s2 -> gen_stmt env oc ret_label break_label cont_label s2 | None -> env1 in
-      Printf.fprintf oc "%s:\n" end_label;
-      env2
+      (match s2_opt with
+      | None ->
+          (* 没有else分支的if语句 *)
+          let end_label = new_label () in
+          gen_expr env oc cond;
+          Printf.fprintf oc "  beqz %s, %s\n" t0 end_label;
+          let env1 = gen_stmt env oc ret_label break_label cont_label s1 in
+          Printf.fprintf oc "%s:\n" end_label;
+          env1
+      | Some s2 ->
+          (* 有else分支的if语句 *)
+          let else_label = new_label () in
+          let end_label = new_label () in
+          gen_expr env oc cond;
+          Printf.fprintf oc "  beqz %s, %s\n" t0 else_label;
+          let env1 = gen_stmt env oc ret_label break_label cont_label s1 in
+          Printf.fprintf oc "  j %s\n" end_label;
+          Printf.fprintf oc "%s:\n" else_label;
+          let env2 = gen_stmt env oc ret_label break_label cont_label s2 in
+          Printf.fprintf oc "%s:\n" end_label;
+          (* 取两个分支中栈偏移更大的那个 *)
+          { var_offset = env.var_offset; 
+            current_offset = min env1.current_offset env2.current_offset })
   | While (cond, s) ->
       let start_label = new_label () in
       let end_label = new_label () in
