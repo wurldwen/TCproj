@@ -1,8 +1,12 @@
-  .text
-  .globl main
-  li t0, 0
-  mv a0, t0
-  j main_ret
+.text
+.globl _start
+_start:
+  call main
+  li a7, 93
+  mv a0, a0
+  ecall
+
+.globl main
 
 main:
   addi sp, sp, -32
