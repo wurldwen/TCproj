@@ -28,9 +28,16 @@ let add_local_var env name =
   let offset = env.current_offset - 4 in
   { var_offset = (name, offset) :: env.var_offset; current_offset = offset }
 
-(* 添加参数：正偏移，从8开始 *)
+(* 添加参数：前8个来自寄存器存储在负偏移，后续的来自栈正偏移 *)
 let add_param env name idx =
-  let offset = 8 + idx * 4 in
+  let offset = 
+    if idx < 8 then
+      (* 前8个参数通过寄存器传递，保存在负偏移位置 *)
+      -20 - idx * 4  (* 参数1在-20(fp), 参数2在-24(fp), 等等 *)
+    else
+      (* 超过8个参数通过栈传递，在正偏移位置 *)
+      (idx - 8) * 4  (* 参数9在0(fp), 参数10在4(fp), 等等 *)
+  in
   { var_offset = (name, offset) :: env.var_offset; current_offset = env.current_offset }
 
 let find_var env name =
@@ -101,19 +108,37 @@ let rec gen_expr env oc = function
       | Ne -> Printf.fprintf oc "  xor %s, %s, %s\n  snez %s, %s\n" t0 t1 t0 t0 t0
       | _ -> ())
   | Call (fname, args) ->
-      let n = List.length args in
-      List.iteri (fun i arg ->
-        gen_expr env oc arg;
-        if i < 8 then
-          Printf.fprintf oc "  mv a%d, %s\n" i t0
-        else (
-          Printf.fprintf oc "  addi %s, %s, -4\n" sp sp;
-          Printf.fprintf oc "  sw %s, 0(%s)\n" t0 sp
-        )
-      ) args;
+      (* 先为栈参数分配空间 *)
+      let stack_args = List.length args - 8 in
+      if stack_args > 0 then
+        Printf.fprintf oc "  addi %s, %s, -%d\n" sp sp (stack_args * 4);
+      
+      (* 反向处理参数，从最后一个开始 *)
+      let rec gen_args_reverse args idx =
+        match args with
+        | [] -> ()
+        | arg :: rest ->
+            gen_args_reverse rest (idx + 1);
+            gen_expr env oc arg;
+            if idx < 8 then
+              (* 前8个参数放入寄存器 *)
+              Printf.fprintf oc "  mv a%d, %s\n" idx t0
+            else (
+              (* 超过8个参数放入栈 *)
+              let stack_offset = (idx - 8) * 4 in
+              Printf.fprintf oc "  sw %s, %d(%s)\n" t0 stack_offset sp
+            )
+      in
+      gen_args_reverse args 0;
+      
+      (* 函数调用 *)
       Printf.fprintf oc "  call %s\n" fname;
-      if n > 8 then
-        Printf.fprintf oc "  addi %s, %s, %d\n" sp sp ((n-8)*4);
+      
+      (* 恢复栈指针 *)
+      if stack_args > 0 then
+        Printf.fprintf oc "  addi %s, %s, %d\n" sp sp (stack_args * 4);
+        
+      (* 保存返回值到t0 *)
       Printf.fprintf oc "  mv %s, %s\n" t0 a0
 
 (* 生成语句代码 *)
@@ -169,16 +194,19 @@ let rec gen_stmt env oc ret_label break_label cont_label = function
 (* 生成函数代码 *)
 let gen_function oc func =
   let ret_label = func.name ^ "_ret" in
-  (* 参数入环境，正偏移 *)
+  
+  (* 参数入环境 *)
   let env =
     List.mapi (fun i p -> (i, p)) func.params
     |> List.fold_left (fun env (i, p) -> add_param env p.pname i) (new_env ())
   in
   
-  (* 只计算栈空间，不生成代码 *)
+  (* 计算栈空间需求 *)
   let env_body = calc_stack_size env (Block func.body) in
   let stack_size = -env_body.current_offset in
-  let total_stack = 16 + stack_size in
+  (* 为前8个参数额外分配空间 *)
+  let param_space = min (List.length func.params) 8 * 4 in
+  let total_stack = 16 + stack_size + param_space in
   
   (* 生成函数标签和序言 *)
   Printf.fprintf oc "\n%s:\n" func.name;
@@ -187,13 +215,13 @@ let gen_function oc func =
   Printf.fprintf oc "  sw %s, %d(%s)\n" fp (total_stack-8) sp;
   Printf.fprintf oc "  addi %s, %s, %d\n" fp sp total_stack;
   
-  (* 保存前8个参数到fp+8, fp+12... *)
+  (* 保存前8个参数到负偏移位置 *)
   List.iteri (fun i _ ->
-    if i < 8 then
-      Printf.fprintf oc "  sw a%d, %d(%s)\n" i (8 + i * 4) fp
+    if i < 8 && i < List.length func.params then
+      Printf.fprintf oc "  sw a%d, %d(%s)\n" i (-20 - i * 4) fp
   ) func.params;
   
-  (* 生成函数体 - 只调用一次 *)
+  (* 生成函数体 *)
   ignore (gen_stmt env oc ret_label "" "" (Block func.body));
   
   (* 返回标签和尾声 *)
