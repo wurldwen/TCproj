@@ -21,17 +21,18 @@ type env = {
   current_offset: int;
 }
 
+(* 局部变量从-52(fp)开始，避免与参数区(-20到-48)和ra/fp(-4到-8)重叠 *)
 let new_env () = { var_offset = []; current_offset = -52 }
 
-(* 添加局部变量：负偏移，从-16(fp)开始递减 *)
+(* 添加局部变量：负偏移，从-52(fp)开始递减 *)
 let add_local_var env name =
   let offset = env.current_offset - 4 in
   { var_offset = (name, offset) :: env.var_offset; current_offset = offset }
 
-(* 添加参数：前8个用负偏移从-20开始递减，后面的用正偏移从0开始递增 *)
+(* 添加参数：前8个用负偏移从-20开始递减，第9个及以上用正偏移从0开始递增 *)
 let add_param env name idx =
   let offset = 
-    if idx < 8 then -20 - idx * 4  (* 前8个：-20, -24, -28, ... *)
+    if idx < 8 then -20 - idx * 4  (* 前8个：-20, -24, -28, ..., -48 *)
     else (idx - 8) * 4              (* 第9个及以上：0, 4, 8, ... *)
   in
   { var_offset = (name, offset) :: env.var_offset; current_offset = env.current_offset }
@@ -105,14 +106,14 @@ let rec gen_expr env oc = function
       | _ -> ())
   | Call (fname, args) ->
       let n = List.length args in
-      (* 先压第9及以上参数，逆序 *)
+      (* 先压第9及以上参数，逆序压栈 *)
       if n > 8 then
         for i = n - 1 downto 8 do
           gen_expr env oc (List.nth args i);
           Printf.fprintf oc "  addi sp, sp, -4\n";
           Printf.fprintf oc "  sw %s, 0(sp)\n" t0
         done;
-      (* 设置a0~a7 *)
+      (* 设置前8个参数到a0~a7 *)
       List.iteri (fun i arg ->
         if i < 8 then (
           gen_expr env oc arg;
@@ -120,6 +121,7 @@ let rec gen_expr env oc = function
         )
       ) args;
       Printf.fprintf oc "  call %s\n" fname;
+      (* 恢复栈指针 *)
       if n > 8 then
         Printf.fprintf oc "  addi sp, sp, %d\n" ((n-8)*4);
       Printf.fprintf oc "  mv %s, %s\n" t0 a0
@@ -186,7 +188,13 @@ let gen_function oc func =
   (* 计算栈空间 *)
   let env_body = calc_stack_size env (Block func.body) in
   let stack_size = -env_body.current_offset in
-  let total_stack = 48 + stack_size in  (* 48字节给参数区，避免冲突 *)
+  (* 确保有足够空间：
+     - ra/fp: 8字节
+     - 前8个参数区(-20到-48): 32字节 
+     - 局部变量: stack_size字节
+     - 额外参数传递空间: 根据需要
+  *)
+  let total_stack = 48 + stack_size in
   
   (* 生成函数标签和序言 *)
   Printf.fprintf oc "\n%s:\n" func.name;
@@ -194,7 +202,7 @@ let gen_function oc func =
   Printf.fprintf oc "  sw %s, %d(%s)\n" fp (total_stack-8) sp;
   Printf.fprintf oc "  addi %s, %s, %d\n" fp sp total_stack;
   
-  (* 保存前8个参数到fp-20, fp-24, ... *)
+  (* 保存前8个参数到fp-20, fp-24, ..., fp-48 *)
   List.iteri (fun i _ ->
     if i < 8 then
       Printf.fprintf oc "  sw a%d, -%d(%s)\n" i (20 + i * 4) fp
@@ -211,5 +219,12 @@ let gen_function oc func =
 
 (* 生成整个程序 *)
 let gen_program oc program =
-  Printf.fprintf oc ".text\n  .globl main\n";
+  Printf.fprintf oc ".text\n";
+  Printf.fprintf oc ".globl _start\n";
+  Printf.fprintf oc "_start:\n";
+  Printf.fprintf oc "  call main\n";
+  Printf.fprintf oc "  li a7, 93\n";
+  Printf.fprintf oc "  mv a0, a0\n";
+  Printf.fprintf oc "  ecall\n";
+  Printf.fprintf oc "\n.globl main\n";
   List.iter (gen_function oc) program
